@@ -442,26 +442,24 @@ namespace OfficeOpenXml.Table.PivotTable
                  {
                      // for no subtotals, set defaultSubtotal to off
                      SetXmlNodeBool("@defaultSubtotal", false);
-                     TopNode.InnerXml = "";
                  }
                  else
                  {
-                     string innerXml = "";
-                     int count = 0;
-                     foreach (eSubTotalFunctions e in Enum.GetValues(typeof(eSubTotalFunctions)))
+                    XmlElement itemsNode = TopNode.SelectSingleNode("d:items", NameSpaceManager) as XmlElement;
+                    foreach (eSubTotalFunctions e in Enum.GetValues(typeof(eSubTotalFunctions)))
                     {
                         if ((value & e) == e)
                         {
                             var newTotalType = e.ToString();
                             var totalType = char.ToLowerInvariant(newTotalType[0]) + newTotalType.Substring(1);
                             // add new attribute
+                            var itemNode = itemsNode.OwnerDocument.CreateElement("item", ExcelPackage.schemaMain);
+                            itemNode.SetAttribute("t", totalType);
+                            itemsNode.AppendChild(itemNode);
                             SetXmlNodeBool("@" + totalType + "Subtotal", true);
-                            innerXml += "<item t=\"" + totalType + "\" />";
-                            count++;
                         }
                     }
-                    TopNode.InnerXml = string.Format("<items count=\"{0}\">{1}</items>", count, innerXml);
-                 }
+                }
              }
          }
         /// <summary>
